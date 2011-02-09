@@ -1,0 +1,6 @@
+dotter is a simple web frontend written in PHP for creating graphs with graphviz.
+
+Requires: 
+	dot executable
+
+Source: https://github.com/tacker/dotter
