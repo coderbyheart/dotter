@@ -51,6 +51,7 @@
 	<li id="uploadlink">Datei hochladen</li>
 	<li><a href="dotserver.php?download=dot">Datei herunterladen</a></li>
 	<li><a href="dotserver.php?download=image">Bild herunterladen</a></li>
+	<li><a href="dotserver.php?download=image&amp;format=pdf">PDF herunterladen</a></li>
 </ul>
 <div id="sourcediv">
 	<form method="post" action="">

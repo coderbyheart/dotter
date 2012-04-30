@@ -17,13 +17,17 @@
 		if ( file_exists( $dotfile ) ) $dot = file_get_contents( $dotfile );
 	}
 
+	$formats = array('pdf', 'png');
+	$defaultFormat = 'png';
+	$format = isset( $_GET['format'] ) ? in_array( $_GET['format'], $formats ) ? $_GET[ 'format' ] : $defaultFormat : $defaultFormat;
+
 	$width = isset( $_POST[ 'width' ] ) ? $_POST[ 'width' ] : false;
 	$height = isset( $_POST[ 'height' ] ) ? $_POST[ 'height' ] : false;
 
 	$download = isset( $_GET[ 'download' ] ) ? $_GET[ 'download' ] : false;
 
 	$graphsdir = dirname( __FILE__ ) . '/graphs/';
-	$pngfile = $graphsdir . '/' . $sid . '.png';
+	$outfile = $graphsdir . '/' . $sid . '.' . $format;
 	file_put_contents( $dotfile, $dot );
 
 	// Welchen renderer benutzen
@@ -34,9 +38,9 @@
 		0 => array('pipe', 'r'),
 		2 => array('pipe', 'w'),
 	);
-	$cmd = '/usr/bin/' . $renderer . ' -Tpng';
+	$cmd = '/usr/bin/' . $renderer . ' -T' . $format;
 	if ( $width && $height ) $cmd .= ' -Gsize=' . $height . ',' . $width;
-	$cmd .= ' -o ' . $pngfile;
+	$cmd .= ' -o ' . $outfile;
 	$process = proc_open( $cmd, $descriptorspec, $pipes, $graphsdir );
 
     fwrite( $pipes[0], $dot );
@@ -55,15 +59,24 @@
 			header( 'Content-Disposition: attachment; filename=' . $sid . '.dot' );
 			echo $dot;
 		} else {
-			header( 'Content-Type: image/png' );
-			header( 'Content-Disposition: attachment; filename=' . $sid . '.png' );
-			echo file_get_contents( $pngfile );
+			switch($format) {
+			case 'png':
+				header( 'Content-Type: image/png' );
+				break;
+			case 'pdf':
+				header( 'Content-Type: application/pdf' );
+				break;
+			default:
+				header( 'Content-Type: application/octet-stream' );
+			}
+			header( 'Content-Disposition: attachment; filename=' . $sid . '.' . $format );
+			echo file_get_contents( $outfile );
 		}
 		return;
     }
 
 	$return = new stdClass();
-	$return->image = basename( $pngfile ) . '?' . time();
+	$return->image = basename( $outfile ) . '?' . time();
 	$return->dotresult = array( 'code' => $dotCode, 'msg' => $dotErrors );
 	$return->success = ( $dotCode === 0 );
 	$return->cmd = $cmd;
